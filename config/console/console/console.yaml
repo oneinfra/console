@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oneinfra-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oneinfra-console
+  namespace: oneinfra-system
+  labels:
+    control-plane: oneinfra-console
+spec:
+  selector:
+    matchLabels:
+      control-plane: oneinfra-console
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        control-plane: oneinfra-console
+    spec:
+      containers:
+      - image: oneinfra/console:20.05.0-alpha1
+        name: console
+        ports:
+        - containerPort: 9000
+        env:
+        - name: JWT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jwt-key
+              key: jwt-key

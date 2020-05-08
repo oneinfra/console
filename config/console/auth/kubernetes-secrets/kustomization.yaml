@@ -1,0 +1,10 @@
+bases:
+- ../../console
+
+resources:
+- namespace.yaml
+- rbac.yaml
+- sample_user.yaml
+
+patchesStrategicMerge:
+- console.yaml

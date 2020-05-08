@@ -1,0 +1,4 @@
+resources:
+- console.yaml
+- service.yaml
+- rbac.yaml

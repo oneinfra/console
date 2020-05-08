@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sample-user
+  namespace: oneinfra-users
+type: Opaque
+data:
+  password: JDJhJDEwJGhXSGtnZEFMWXQuRGYvT2pTOVNnQmVzc2R2dWZWZC5XbVdac1lodDZwWHBYVkh4dU11bXE2Cg==

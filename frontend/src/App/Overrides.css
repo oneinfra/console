@@ -1,0 +1,38 @@
+:root {
+    cursor: default;
+}
+
+a:not([href]):not([tabindex]) {
+    color: white;
+}
+
+a:not([href]):not([tabindex]):hover, a:not([href]):not([tabindex]):focus {
+    color: white;
+    text-decoration: none;
+}
+
+button[disabled] {
+    cursor: default;
+}
+
+.sidebar .sidebar-brand .sidebar-brand-text-short {
+  display: inline;
+}
+
+@media (min-width: 768px) {
+  .sidebar .sidebar-brand .sidebar-brand-text-short {
+    display: none;
+  }
+}
+
+.full-screen-spinner {
+    z-index: 40;
+}
+
+.sk-chase-dot.white:before {
+    background: white;
+}
+
+.sk-chase-dot.secondary:before {
+    background: #6c757d;
+}
