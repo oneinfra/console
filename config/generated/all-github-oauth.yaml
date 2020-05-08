@@ -34,6 +34,7 @@ metadata:
   labels:
     control-plane: oneinfra-console
   name: oneinfra-console
+  namespace: oneinfra-system
 spec:
   ports:
   - port: 80
