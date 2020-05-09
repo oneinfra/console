@@ -21,7 +21,7 @@ spec:
         control-plane: oneinfra-console
     spec:
       containers:
-      - image: oneinfra/console:20.05.0-alpha2
+      - image: oneinfra/console:20.05.0-alpha3
         name: console
         ports:
         - containerPort: 9000
