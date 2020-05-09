@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/mux v1.7.4
-	github.com/oneinfra/oneinfra v0.0.0-20200503160035-d4062ea10828
+	github.com/oneinfra/oneinfra v0.0.0-20200509150817-78aadc3e9a8f
 	github.com/pkg/errors v0.9.1
 	github.com/urfave/cli/v2 v2.1.1
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975

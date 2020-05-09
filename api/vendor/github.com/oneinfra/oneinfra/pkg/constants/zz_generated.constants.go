@@ -20,14 +20,14 @@ package constants
 
 const (
 	// RawReleaseData represents the supported versions for this release
-	RawReleaseData = `version: 20.05.0-alpha10
+	RawReleaseData = `version: 20.05.0-alpha11
 defaultKubernetesVersion: 1.18.2
 containerdVersions:
 - version: 1.3.3
   criToolsVersion: 1.17.0
   cniPluginsVersion: 0.8.5
 kubernetesVersions:
-- version: 1.15.11
+- version: 1.15.12
   containerdVersion: 1.3.3
   etcdVersion: 3.4.3
   pauseVersion: 3.1
@@ -47,7 +47,7 @@ kubernetesVersions:
   etcdVersion: 3.4.3
   pauseVersion: 3.1
   coreDNSVersion: 1.6.7
-- version: 1.19.0-alpha.2
+- version: 1.19.0-alpha.3
   containerdVersion: 1.3.3
   etcdVersion: 3.4.3
   pauseVersion: 3.1
