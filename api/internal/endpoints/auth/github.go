@@ -24,14 +24,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Github(r *http.Request) (internal.User, string, error) {
+func Github(r *http.Request) (internal.User, error) {
 	user, err := github.RetrieveUser(r.URL.Query().Get("code"))
 	if err != nil {
-		return internal.User{}, "", errors.Errorf("could not retrieve github user: %v", err)
+		return internal.User{}, errors.Errorf("could not retrieve github user: %v", err)
 	}
-	token, err := internal.NewJWT(user)
-	if err != nil {
-		return internal.User{}, "", err
-	}
-	return user, token, nil
+	return user, nil
 }

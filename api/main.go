@@ -34,6 +34,7 @@ import (
 	"github.com/oneinfra/console/api/constants"
 	"github.com/oneinfra/console/api/handlers"
 	"github.com/oneinfra/console/api/internal"
+	"github.com/oneinfra/console/api/internal/endpoints/auth"
 	oneinfra "github.com/oneinfra/oneinfra/pkg/clientset/manager"
 )
 
@@ -74,10 +75,10 @@ func serve(requestedAuthenticationMethods []string) error {
 
 	if _, hasGithub := authenticationMethods[constants.GithubOAuth]; hasGithub {
 		r.HandleFunc("/api/login/github", handlers.LoginGithubHandler).Methods(http.MethodGet)
-		r.HandleFunc("/api/auth/github", handlers.AuthGithubHandler).Methods(http.MethodGet)
+		r.HandleFunc("/api/auth/github", handlers.GenericAuthHandler(auth.Github)).Methods(http.MethodGet)
 	}
 	if _, hasKubernetesSecrets := authenticationMethods[constants.KubernetesSecrets]; hasKubernetesSecrets {
-		r.HandleFunc("/api/auth/kubernetes", handlers.AuthKubernetesHandler).Methods(http.MethodPost)
+		r.HandleFunc("/api/auth/kubernetes", handlers.GenericAuthHandler(auth.Kubernetes)).Methods(http.MethodPost)
 	}
 	r.HandleFunc("/api/session", handlers.DeleteSession).Methods(http.MethodDelete)
 	r.HandleFunc("/api/user", handlers.GetUser).Methods(http.MethodGet)

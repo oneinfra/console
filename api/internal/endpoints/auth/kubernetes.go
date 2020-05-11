@@ -26,22 +26,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-func Kubernetes(r *http.Request) (internal.User, string, error) {
+func Kubernetes(r *http.Request) (internal.User, error) {
 	loginRequestRaw, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return internal.User{}, "", err
+		return internal.User{}, err
 	}
 	var loginRequest kubernetes.LoginRequest
 	if err := json.Unmarshal(loginRequestRaw, &loginRequest); err != nil {
-		return internal.User{}, "", err
+		return internal.User{}, err
 	}
 	user, err := kubernetes.RetrieveUser(loginRequest)
 	if err != nil {
-		return internal.User{}, "", errors.Errorf("could not retrieve kubernetes user: %v", err)
+		return internal.User{}, errors.Errorf("could not retrieve kubernetes user: %v", err)
 	}
-	token, err := internal.NewJWT(user)
-	if err != nil {
-		return internal.User{}, "", err
-	}
-	return user, token, nil
+	return user, nil
 }

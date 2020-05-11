@@ -22,57 +22,40 @@ import (
 	"k8s.io/klog"
 
 	"github.com/oneinfra/console/api/internal"
-	"github.com/oneinfra/console/api/internal/endpoints/auth"
 )
 
-func AuthGithubHandler(w http.ResponseWriter, r *http.Request) {
-	user, token, err := auth.Github(r)
-	if err != nil {
-		klog.Errorf("could not login with github: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if err := internal.EnsureUserNamespace(user.Namespace()); err != nil {
-		klog.Errorf("could not ensure user namespace: %q", user.Namespace())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	http.SetCookie(w, &http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-	})
-	redirectURI := "/"
-	requestQuery := r.URL.Query()
-	if requestQuery["redirect"] != nil && len(requestQuery["redirect"]) == 1 {
-		redirectURI = requestQuery["redirect"][0]
-	}
-	http.Redirect(w, r, redirectURI, http.StatusTemporaryRedirect)
-}
+type AuthHandler func(r *http.Request) (internal.User, error)
 
-func AuthKubernetesHandler(w http.ResponseWriter, r *http.Request) {
-	user, token, err := auth.Kubernetes(r)
-	if err != nil {
-		klog.Errorf("could not login with kubernetes: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+func GenericAuthHandler(authHandler AuthHandler) Handler {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, err := authHandler(r)
+		if err != nil {
+			klog.Errorf("could not authenticate user")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		token, err := internal.NewJWT(user)
+		if err != nil {
+			klog.Errorf("could not create JWT for user %q", user)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if err := internal.EnsureUserNamespace(user.Namespace()); err != nil {
+			klog.Errorf("could not ensure user namespace: %q", user.Namespace())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:     "token",
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,
+		})
+		redirectURI := "/"
+		requestQuery := r.URL.Query()
+		if requestQuery["redirect"] != nil && len(requestQuery["redirect"]) == 1 {
+			redirectURI = requestQuery["redirect"][0]
+		}
+		http.Redirect(w, r, redirectURI, http.StatusTemporaryRedirect)
 	}
-	if err := internal.EnsureUserNamespace(user.Namespace()); err != nil {
-		klog.Errorf("could not ensure user namespace: %q", user.Namespace())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	http.SetCookie(w, &http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-	})
-	redirectURI := "/"
-	requestQuery := r.URL.Query()
-	if requestQuery["redirect"] != nil && len(requestQuery["redirect"]) == 1 {
-		redirectURI = requestQuery["redirect"][0]
-	}
-	http.Redirect(w, r, redirectURI, http.StatusTemporaryRedirect)
 }
