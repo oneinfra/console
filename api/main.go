@@ -17,6 +17,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -145,7 +146,7 @@ func initializeKubernetesVersions() {
 			releaseData.Version,
 		)
 	}
-	rawKubernetesVersions, err := yaml.Marshal(&kubernetesVersions)
+	rawKubernetesVersions, err := json.Marshal(&kubernetesVersions)
 	if err != nil {
 		klog.Fatal("could not marshal versioning information")
 	}
