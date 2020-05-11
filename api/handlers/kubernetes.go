@@ -17,13 +17,9 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"k8s.io/klog"
-
 	"github.com/oneinfra/console/api/internal"
-	"github.com/oneinfra/oneinfra/pkg/constants"
 )
 
 type KubernetesVersions struct {
@@ -32,29 +28,11 @@ type KubernetesVersions struct {
 }
 
 var (
-	kubernetesVersions []byte
+	AllKubernetesVersions []byte
 )
-
-func init() {
-	allVersions := KubernetesVersions{
-		Default:  constants.ReleaseData.DefaultKubernetesVersion,
-		Versions: []string{},
-	}
-	for _, version := range constants.ReleaseData.KubernetesVersions {
-		allVersions.Versions = append(
-			allVersions.Versions,
-			version.Version,
-		)
-	}
-	var err error
-	kubernetesVersions, err = json.Marshal(allVersions)
-	if err != nil {
-		klog.Fatalf("could not marshal kubernetes versions: %v", err)
-	}
-}
 
 func GetKubernetesVersions(w http.ResponseWriter, r *http.Request) {
 	internal.WithAuthenticatedRequest(w, r, func(user internal.User) {
-		w.Write(kubernetesVersions)
+		w.Write(AllKubernetesVersions)
 	})
 }

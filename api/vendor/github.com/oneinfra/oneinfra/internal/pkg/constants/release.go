@@ -21,75 +21,30 @@ import (
 
 	"github.com/pkg/errors"
 	"sigs.k8s.io/yaml"
+
+	versions "github.com/oneinfra/oneinfra/pkg/versions"
 )
-
-// Component represents a versioned component
-type Component string
-
-const (
-	// CRITools is the CRI tools component
-	CRITools Component = "cri-tools"
-	// Containerd is the containerd component
-	Containerd Component = "containerd"
-	// CNIPlugins is the CNI plugins component
-	CNIPlugins Component = "cni-plugins"
-	// Etcd is the etcd component
-	Etcd Component = "etcd"
-	// Pause is the pause component
-	Pause Component = "pause"
-	// CoreDNS is the CoreDNS component
-	CoreDNS Component = "coredns"
-)
-
-var (
-	// KubernetesComponents is the list of all versioned components
-	KubernetesComponents = []Component{CRITools, Containerd, CNIPlugins, Etcd, Pause}
-)
-
-// ReleaseInfo represents a list of supported component versions
-type ReleaseInfo struct {
-	Version                  string              `json:"version"`
-	DefaultKubernetesVersion string              `json:"defaultKubernetesVersion"`
-	ContainerdVersions       []ContainerdVersion `json:"containerdVersions"`
-	KubernetesVersions       []KubernetesVersion `json:"kubernetesVersions"`
-}
-
-// ContainerdVersion represents a supported containerd version for testing
-type ContainerdVersion struct {
-	Version           string `json:"version"`
-	CRIToolsVersion   string `json:"criToolsVersion"`
-	CNIPluginsVersion string `json:"cniPluginsVersion"`
-}
-
-// KubernetesVersion represents a supported Kubernetes version
-type KubernetesVersion struct {
-	Version           string `json:"version"`
-	ContainerdVersion string `json:"containerdVersion"`
-	EtcdVersion       string `json:"etcdVersion"`
-	PauseVersion      string `json:"pauseVersion"`
-	CoreDNSVersion    string `json:"coreDNSVersion"`
-}
 
 var (
 	// ReleaseData includes all release information
-	ReleaseData *ReleaseInfo
+	ReleaseData *versions.ReleaseInfo
 	// ContainerdVersions has a map of the test containerd versions
-	ContainerdVersions map[string]ContainerdVersion
+	ContainerdVersions map[string]versions.ContainerdVersion
 	// KubernetesVersions has a map of the supported Kubernetes versions
-	KubernetesVersions map[string]KubernetesVersion
+	KubernetesVersions map[string]versions.KubernetesVersion
 )
 
 func init() {
-	var currReleaseData ReleaseInfo
+	var currReleaseData versions.ReleaseInfo
 	if err := yaml.Unmarshal([]byte(RawReleaseData), &currReleaseData); err != nil {
 		log.Fatalf("could not unmarshal RELEASE file contents: %v", err)
 	}
 	ReleaseData = &currReleaseData
-	ContainerdVersions = map[string]ContainerdVersion{}
+	ContainerdVersions = map[string]versions.ContainerdVersion{}
 	for _, containerdVersion := range ReleaseData.ContainerdVersions {
 		ContainerdVersions[containerdVersion.Version] = containerdVersion
 	}
-	KubernetesVersions = map[string]KubernetesVersion{}
+	KubernetesVersions = map[string]versions.KubernetesVersion{}
 	for _, kubernetesVersion := range ReleaseData.KubernetesVersions {
 		KubernetesVersions[kubernetesVersion.Version] = kubernetesVersion
 	}
@@ -97,7 +52,7 @@ func init() {
 
 // KubernetesVersionBundle returns the KubernetesVersion for the
 // provided version
-func KubernetesVersionBundle(version string) (*KubernetesVersion, error) {
+func KubernetesVersionBundle(version string) (*versions.KubernetesVersion, error) {
 	if kubernetesVersion, exists := KubernetesVersions[version]; exists {
 		return &kubernetesVersion, nil
 	}
@@ -106,24 +61,26 @@ func KubernetesVersionBundle(version string) (*KubernetesVersion, error) {
 
 // KubernetesComponentVersion returns the component version for the
 // given Kubernetes version and component
-func KubernetesComponentVersion(version string, component Component) (string, error) {
+func KubernetesComponentVersion(version string, component versions.Component) (string, error) {
 	kubernetesVersionBundle, err := KubernetesVersionBundle(version)
 	if err != nil {
 		return "", err
 	}
 	switch component {
-	case CRITools:
+	case versions.CRITools:
 		return ContainerdVersions[kubernetesVersionBundle.ContainerdVersion].CRIToolsVersion, nil
-	case Containerd:
+	case versions.Containerd:
 		return kubernetesVersionBundle.ContainerdVersion, nil
-	case CNIPlugins:
+	case versions.CNIPlugins:
 		return ContainerdVersions[kubernetesVersionBundle.ContainerdVersion].CNIPluginsVersion, nil
-	case Etcd:
+	case versions.Etcd:
 		return kubernetesVersionBundle.EtcdVersion, nil
-	case Pause:
+	case versions.Pause:
 		return kubernetesVersionBundle.PauseVersion, nil
-	case CoreDNS:
+	case versions.CoreDNS:
 		return kubernetesVersionBundle.CoreDNSVersion, nil
 	}
 	return "", errors.Errorf("could not find component %q in version %q", component, version)
 }
+
+//go:generate ../../../scripts/release-gen.sh

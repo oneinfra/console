@@ -26,43 +26,25 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
+	"sigs.k8s.io/yaml"
 
 	"github.com/oneinfra/console/api/constants"
 	"github.com/oneinfra/console/api/handlers"
 	"github.com/oneinfra/console/api/internal"
 	"github.com/oneinfra/console/api/internal/endpoints/auth"
 	oneinfra "github.com/oneinfra/oneinfra/pkg/clientset/manager"
+	constantsapi "github.com/oneinfra/oneinfra/pkg/constants"
+	"github.com/oneinfra/oneinfra/pkg/versions"
 )
 
 func init() {
-	homeKubeConfigPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-	var config *rest.Config
-	var err error
-	if kubeConfigPath := os.Getenv("KUBECONFIG"); len(kubeConfigPath) > 0 {
-		config, err = clientcmd.BuildConfigFromFlags("", kubeConfigPath)
-		klog.Infof("using kubeconfig from local path %s", kubeConfigPath)
-	} else if _, err := os.Stat(homeKubeConfigPath); err == nil {
-		config, err = clientcmd.BuildConfigFromFlags("", homeKubeConfigPath)
-		klog.Infof("using kubeconfig from local path %s", homeKubeConfigPath)
-	} else {
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			klog.Fatalf("failed to fetch in-cluster configuration: %v", err)
-		}
-		klog.Infof("using in-cluster configuration")
-	}
-	internal.KubernetesClientset, err = kubernetes.NewForConfig(config)
-	if err != nil {
-		klog.Fatalf("failed to create a Kubernetes clientset: %v", err)
-	}
-	internal.OneInfraClientset, err = oneinfra.NewForConfig(config)
-	if err != nil {
-		klog.Fatalf("failed to create a oneinfra clientset: %v", err)
-	}
+	initializeClientsets()
+	initializeKubernetesVersions()
 }
 
 func serve(requestedAuthenticationMethods []string) error {
@@ -106,6 +88,68 @@ func serve(requestedAuthenticationMethods []string) error {
 	}
 
 	return srv.ListenAndServe()
+}
+
+func initializeClientsets() {
+	homeKubeConfigPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
+	var config *rest.Config
+	var err error
+	if kubeConfigPath := os.Getenv("KUBECONFIG"); len(kubeConfigPath) > 0 {
+		config, err = clientcmd.BuildConfigFromFlags("", kubeConfigPath)
+		klog.Infof("using kubeconfig from local path %s", kubeConfigPath)
+	} else if _, err := os.Stat(homeKubeConfigPath); err == nil {
+		config, err = clientcmd.BuildConfigFromFlags("", homeKubeConfigPath)
+		klog.Infof("using kubeconfig from local path %s", homeKubeConfigPath)
+	} else {
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			klog.Fatalf("failed to fetch in-cluster configuration: %v", err)
+		}
+		klog.Infof("using in-cluster configuration")
+	}
+	internal.KubernetesClientset, err = kubernetes.NewForConfig(config)
+	if err != nil {
+		klog.Fatalf("failed to create a Kubernetes clientset: %v", err)
+	}
+	internal.OneInfraClientset, err = oneinfra.NewForConfig(config)
+	if err != nil {
+		klog.Fatalf("failed to create a oneinfra clientset: %v", err)
+	}
+}
+
+func initializeKubernetesVersions() {
+	configMap, err := internal.KubernetesClientset.CoreV1().ConfigMaps(
+		constantsapi.OneInfraNamespace,
+	).Get(
+		constantsapi.OneInfraVersionConfigMap,
+		metav1.GetOptions{},
+	)
+	if err != nil {
+		klog.Fatalf("could not read versions from ConfigMap %q", constantsapi.OneInfraVersionConfigMap)
+	}
+	rawReleaseInfo, exists := configMap.Data[constantsapi.OneInfraVersionsKeyName]
+	if !exists {
+		klog.Fatalf("ConfigMap %q does not contain a %q key", constantsapi.OneInfraVersionConfigMap, constantsapi.OneInfraVersionsKeyName)
+	}
+	var releaseInfo versions.ReleaseInfo
+	if err := yaml.Unmarshal([]byte(rawReleaseInfo), &releaseInfo); err != nil {
+		klog.Fatal("could not unmarshal versioning information")
+	}
+	kubernetesVersions := handlers.KubernetesVersions{
+		Default:  releaseInfo.DefaultKubernetesVersion,
+		Versions: []string{},
+	}
+	for _, releaseData := range releaseInfo.KubernetesVersions {
+		kubernetesVersions.Versions = append(
+			kubernetesVersions.Versions,
+			releaseData.Version,
+		)
+	}
+	rawKubernetesVersions, err := yaml.Marshal(&kubernetesVersions)
+	if err != nil {
+		klog.Fatal("could not marshal versioning information")
+	}
+	handlers.AllKubernetesVersions = rawKubernetesVersions
 }
 
 func main() {
