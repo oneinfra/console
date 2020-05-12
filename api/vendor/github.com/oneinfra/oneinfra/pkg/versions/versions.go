@@ -21,22 +21,12 @@ type ReleaseInfo struct {
 	Version                  string              `json:"version"`
 	ConsoleVersion           string              `json:"consoleVersion"`
 	DefaultKubernetesVersion string              `json:"defaultKubernetesVersion"`
-	ContainerdVersions       []ContainerdVersion `json:"containerdVersions"`
 	KubernetesVersions       []KubernetesVersion `json:"kubernetesVersions"`
-}
-
-// ContainerdVersion represents a supported containerd version for testing
-type ContainerdVersion struct {
-	Version           string `json:"version"`
-	CRIToolsVersion   string `json:"criToolsVersion"`
-	CNIPluginsVersion string `json:"cniPluginsVersion"`
 }
 
 // KubernetesVersion represents a supported Kubernetes version
 type KubernetesVersion struct {
-	Version           string `json:"version"`
-	ContainerdVersion string `json:"containerdVersion"`
-	EtcdVersion       string `json:"etcdVersion"`
-	PauseVersion      string `json:"pauseVersion"`
-	CoreDNSVersion    string `json:"coreDNSVersion"`
+	Version        string `json:"version"`
+	EtcdVersion    string `json:"etcdVersion"`
+	CoreDNSVersion string `json:"coreDNSVersion"`
 }

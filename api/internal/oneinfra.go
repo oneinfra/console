@@ -17,6 +17,7 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,6 +31,7 @@ func (user User) Clusters() (*clusterv1alpha1.ClusterList, error) {
 	return OneInfraClientset.ClusterV1alpha1().Clusters(
 		user.Namespace(),
 	).List(
+		context.TODO(),
 		metav1.ListOptions{},
 	)
 }
@@ -38,6 +40,7 @@ func (user User) CreateCluster(name, kubernetesVersion string, replicas int) err
 	_, err := OneInfraClientset.ClusterV1alpha1().Clusters(
 		user.Namespace(),
 	).Create(
+		context.TODO(),
 		&clusterv1alpha1.Cluster{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
@@ -48,6 +51,7 @@ func (user User) CreateCluster(name, kubernetesVersion string, replicas int) err
 				ControlPlaneReplicas: replicas,
 			},
 		},
+		metav1.CreateOptions{},
 	)
 	return err
 }
@@ -69,7 +73,9 @@ func (user User) UpdateCluster(cluster *clusterv1alpha1.Cluster) error {
 	_, err := OneInfraClientset.ClusterV1alpha1().Clusters(
 		user.Namespace(),
 	).Update(
+		context.TODO(),
 		cluster,
+		metav1.UpdateOptions{},
 	)
 	return err
 }
@@ -78,8 +84,9 @@ func (user User) DeleteCluster(clusterName string) error {
 	return OneInfraClientset.ClusterV1alpha1().Clusters(
 		user.Namespace(),
 	).Delete(
+		context.TODO(),
 		clusterName,
-		&metav1.DeleteOptions{},
+		metav1.DeleteOptions{},
 	)
 }
 
@@ -87,6 +94,7 @@ func (user User) ClusterComponents(clusterName string) (*clusterv1alpha1.Compone
 	return OneInfraClientset.ClusterV1alpha1().Components(
 		user.Namespace(),
 	).List(
+		context.TODO(),
 		metav1.ListOptions{
 			LabelSelector: fmt.Sprintf("%s=%s", constants.OneInfraClusterNameLabelName, clusterName),
 		},

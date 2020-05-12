@@ -17,6 +17,7 @@
 package kubernetes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -36,6 +37,7 @@ func RetrieveUser(loginRequest LoginRequest) (internal.User, error) {
 	userSecret, err := internal.KubernetesClientset.CoreV1().Secrets(
 		constants.OneInfraUsersNamespace,
 	).Get(
+		context.TODO(),
 		loginRequest.Username,
 		metav1.GetOptions{},
 	)

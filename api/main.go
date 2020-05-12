@@ -17,6 +17,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -38,7 +39,7 @@ import (
 	"github.com/oneinfra/console/api/handlers"
 	"github.com/oneinfra/console/api/internal"
 	"github.com/oneinfra/console/api/internal/endpoints/auth"
-	oneinfra "github.com/oneinfra/oneinfra/pkg/clientset/manager"
+	oneinfra "github.com/oneinfra/oneinfra/pkg/clientsets/manager"
 	constantsapi "github.com/oneinfra/oneinfra/pkg/constants"
 	"github.com/oneinfra/oneinfra/pkg/versions"
 )
@@ -119,18 +120,19 @@ func initializeClientsets() {
 }
 
 func initializeKubernetesVersions() {
-	configMap, err := internal.KubernetesClientset.CoreV1().ConfigMaps(
+	versionsConfigMap, err := internal.KubernetesClientset.CoreV1().ConfigMaps(
 		constantsapi.OneInfraNamespace,
 	).Get(
-		constantsapi.OneInfraVersionConfigMap,
+		context.TODO(),
+		constantsapi.OneInfraVersionsConfigMap,
 		metav1.GetOptions{},
 	)
 	if err != nil {
-		klog.Fatalf("could not read versions from ConfigMap %q", constantsapi.OneInfraVersionConfigMap)
+		klog.Fatalf("could not read versions from ConfigMap %q", constantsapi.OneInfraVersionsConfigMap)
 	}
-	rawReleaseInfo, exists := configMap.Data[constantsapi.OneInfraVersionsKeyName]
+	rawReleaseInfo, exists := versionsConfigMap.Data[constantsapi.OneInfraVersionsKeyName]
 	if !exists {
-		klog.Fatalf("ConfigMap %q does not contain a %q key", constantsapi.OneInfraVersionConfigMap, constantsapi.OneInfraVersionsKeyName)
+		klog.Fatalf("ConfigMap %q does not contain a %q key", constantsapi.OneInfraVersionsConfigMap, constantsapi.OneInfraVersionsKeyName)
 	}
 	var releaseInfo versions.ReleaseInfo
 	if err := yaml.Unmarshal([]byte(rawReleaseInfo), &releaseInfo); err != nil {

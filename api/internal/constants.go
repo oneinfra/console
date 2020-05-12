@@ -19,7 +19,7 @@ package internal
 import (
 	"k8s.io/client-go/kubernetes"
 
-	oneinfra "github.com/oneinfra/oneinfra/pkg/clientset/manager"
+	oneinfra "github.com/oneinfra/oneinfra/pkg/clientsets/manager"
 )
 
 var (
