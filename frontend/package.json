@@ -11,7 +11,7 @@
     "jquery": "^3.5.0",
     "js-cookie": "^2.2.1",
     "md5": "^2.2.1",
-    "path-to-regexp": "^6.1.0",
+    "path-to-regexp": "^8.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
