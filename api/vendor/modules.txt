@@ -125,15 +125,13 @@ golang.org/x/crypto/blowfish
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/net v0.47.0
 ## explicit; go 1.24.0
-golang.org/x/net/context
-golang.org/x/net/context/ctxhttp
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/httpcommon
-# golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-## explicit; go 1.11
+# golang.org/x/oauth2 v0.27.0
+## explicit; go 1.23.0
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
 # golang.org/x/sys v0.38.0
@@ -156,15 +154,6 @@ golang.org/x/time/rate
 # gomodules.xyz/jsonpatch/v2 v2.0.1
 ## explicit; go 1.12
 gomodules.xyz/jsonpatch/v2
-# google.golang.org/appengine v1.6.5
-## explicit; go 1.11
-google.golang.org/appengine/internal
-google.golang.org/appengine/internal/base
-google.golang.org/appengine/internal/datastore
-google.golang.org/appengine/internal/log
-google.golang.org/appengine/internal/remote_api
-google.golang.org/appengine/internal/urlfetch
-google.golang.org/appengine/urlfetch
 # google.golang.org/protobuf v1.26.0-rc.1
 ## explicit; go 1.9
 google.golang.org/protobuf/encoding/prototext
